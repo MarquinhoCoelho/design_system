@@ -1,0 +1,314 @@
+/* ═══ Design system ═══
+   Importe este arquivo uma vez no CSS principal do projeto, depois das diretivas do Tailwind:
+
+     @tailwind base;
+     @tailwind components;
+     @tailwind utilities;
+     @import './design-system.css';   (ou cole o conteúdo)
+
+   Cores em canais RGB (permitem opacidade no Tailwind: bg-primary/10).
+   Tema: data-theme="light" ou "dark" no <html>. Cor da marca: --primary (use setBrandColor de lib/theme.ts). */
+:root,
+[data-theme='light'] {
+  --primary: 46 125 135;
+  --primary-fg: 255 255 255;
+  --bg: 245 245 245;
+  --surface: 255 255 255;
+  --surface-2: 240 240 240;
+  --field: 255 255 255; /* fundo dos campos */
+  --elevated: 255 255 255; /* menus e listas flutuantes */
+  --border: 0 0 0;
+  --fg: 23 23 23;
+  --muted: 110 110 110;
+  --danger: 220 38 38;
+  --success: 21 128 61;
+  --warning: 180 83 9;
+  --shadow: 0 0 0;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: 10 10 10;
+  --surface: 26 26 26;
+  --surface-2: 38 38 38;
+  --field: 38 38 38;
+  --elevated: 32 32 32;
+  --border: 255 255 255;
+  --fg: 245 245 245;
+  --muted: 163 163 163;
+  --danger: 239 68 68;
+  --success: 34 197 94;
+  --warning: 245 158 11;
+  --shadow: 0 0 0;
+  color-scheme: dark;
+}
+
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --check-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    @apply min-h-full;
+  }
+  body {
+    @apply bg-bg font-sans text-fg antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--primary));
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: rgb(var(--primary) / 0.25);
+  }
+
+  /* Caixa de marcar e opção única: mesma aparência em todos os navegadores, na cor da marca. */
+  input[type='checkbox'],
+  input[type='radio'] {
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-grid;
+    place-content: center;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1.5px solid rgb(var(--border) / 0.28);
+    border-radius: 6px;
+    background: rgb(var(--field));
+    transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  }
+  input[type='radio'] {
+    border-radius: 999px;
+  }
+  input[type='checkbox']:hover,
+  input[type='radio']:hover {
+    border-color: rgb(var(--primary));
+  }
+  input[type='checkbox']:checked,
+  input[type='checkbox']:indeterminate,
+  input[type='radio']:checked {
+    border-color: rgb(var(--primary));
+    background: rgb(var(--primary));
+  }
+  input[type='checkbox']:checked::after {
+    content: '';
+    width: 12px;
+    height: 12px;
+    background: rgb(var(--primary-fg));
+    -webkit-mask: var(--check-mask) center / contain no-repeat;
+    mask: var(--check-mask) center / contain no-repeat;
+  }
+  input[type='checkbox']:indeterminate::after {
+    content: '';
+    width: 9px;
+    height: 2px;
+    border-radius: 2px;
+    background: rgb(var(--primary-fg));
+  }
+  input[type='radio']:checked::after {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgb(var(--primary-fg));
+  }
+  input[type='checkbox']:focus-visible,
+  input[type='radio']:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px rgb(var(--primary) / 0.2);
+  }
+  input[type='checkbox']:disabled,
+  input[type='radio']:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-border/[0.08] bg-surface shadow-card;
+  }
+  /* Campo de texto (também usado pelo gatilho do Select): borda fina, anel suave da marca no foco. */
+  .input {
+    @apply block min-h-[44px] w-full rounded-xl border border-border/[0.14] bg-field px-3.5 py-2.5 text-sm text-fg shadow-xs outline-none transition-[border-color,box-shadow,background-color] duration-150 placeholder:text-muted/80;
+  }
+  .input:hover:not(:disabled):not(:focus):not([aria-disabled='true']) {
+    @apply border-border/[0.28];
+  }
+  .input:focus,
+  .input:focus-within,
+  .input[data-open='true'] {
+    @apply border-primary outline-none ring-4 ring-primary/[0.14];
+  }
+  .input:disabled,
+  .input[aria-disabled='true'] {
+    @apply cursor-not-allowed bg-surface-2 opacity-60;
+  }
+  .input[aria-invalid='true'] {
+    @apply border-danger;
+  }
+  .input[aria-invalid='true']:focus,
+  .input[aria-invalid='true']:focus-within {
+    @apply ring-danger/[0.16];
+  }
+  .input-sm {
+    @apply min-h-[36px] rounded-lg px-3 py-1.5 text-[13px];
+  }
+  /* No dedo, o campo pequeno volta a ter a altura mínima de toque. */
+  @media (pointer: coarse) {
+    .input-sm {
+      @apply min-h-[44px];
+    }
+  }
+  textarea.input {
+    @apply min-h-[96px] resize-y leading-relaxed;
+  }
+  select.input {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8f98' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    background-size: 16px;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-semibold text-fg;
+  }
+  .field-hint {
+    @apply mt-1.5 text-xs text-muted;
+  }
+  .field-error {
+    @apply mt-1.5 flex items-center gap-1.5 text-xs font-medium text-danger;
+  }
+  /* Menus e listas flutuantes (Select, MultiSelect) */
+  .popover {
+    @apply rounded-xl border border-border/[0.1] bg-elevated text-fg shadow-pop;
+  }
+  .option {
+    @apply flex w-full cursor-pointer select-none items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm outline-none transition-colors duration-100;
+  }
+  .option[data-active='true'] {
+    @apply bg-fg/[0.06];
+  }
+  .option[aria-selected='true'] {
+    @apply font-medium text-primary;
+  }
+  .option[aria-disabled='true'] {
+    @apply cursor-not-allowed opacity-45;
+  }
+}
+
+/* Barra de rolagem fina e discreta. */
+.nice-scroll,
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--fg) / 0.22) transparent;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Carregando: bloco cinza com um brilho que atravessa. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgb(var(--border) / 0.07);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(var(--surface) / 0.55), transparent);
+  animation: skeleton-shimmer 1.4s var(--ease-in-out) infinite;
+}
+[data-theme='dark'] .skeleton::after {
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent);
+}
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Entradas */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.fade-in {
+  animation: fade-in 150ms ease;
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.rise-in {
+  animation: rise-in 360ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+.pop-in {
+  transform-origin: var(--origin, top right);
+  animation: pop-in 180ms var(--ease-out);
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise-in,
+  .pop-in,
+  .fade-in {
+    animation: fade 150ms ease both;
+  }
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+/* iPhone dá zoom ao tocar num campo com fonte menor que 16px. */
+@media (pointer: coarse), (max-width: 767px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+/* Botão só com ícone: área de toque de 40px no dedo, sem mudar o visual no mouse. */
+@media (pointer: coarse) {
+  .tap:not(.absolute):not(.fixed) {
+    position: relative;
+  }
+  .tap::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 40px);
+    height: max(100%, 40px);
+    transform: translate(-50%, -50%);
+  }
+}
